@@ -157,9 +157,13 @@ body {
 }
 
 .sidebar-group-panel {
-    display: grid;
+    display: none;
     gap: 6px;
     padding-left: 8px;
+}
+
+.sidebar-group-panel.show {
+    display: grid;
 }
 
 .sidebar-nav a {

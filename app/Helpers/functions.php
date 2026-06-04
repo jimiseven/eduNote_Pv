@@ -17,7 +17,11 @@ function url(string $path = ''): string
 
 function asset(string $path): string
 {
-    return url('/public/assets/' . ltrim($path, '/'));
+    $path = ltrim($path, '/');
+    $file = BASE_PATH . '/public/assets/' . $path;
+    $version = is_file($file) ? '?v=' . filemtime($file) : '';
+
+    return url('/public/assets/' . $path) . $version;
 }
 
 function csrf_token(): string

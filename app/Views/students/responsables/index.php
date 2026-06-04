@@ -1,0 +1,6 @@
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h2 class="h3 fw-bold mb-1">Responsables</h2><p class="text-muted mb-0">Padres, madres, tutores y contactos.</p></div><a href="<?= e(url('/responsables/crear')) ?>" class="btn btn-primary">Nuevo responsable</a></div>
+<?php if (!empty($success)): ?><div class="alert alert-success"><?= e($success) ?></div><?php endif; ?>
+<div class="panel-card p-0 overflow-hidden"><div class="table-responsive"><table class="table mb-0 align-middle"><thead class="table-light"><tr><th>Responsable</th><th>CI</th><th>Celular</th><th>Instruccion</th><th class="text-end">Acciones</th></tr></thead><tbody>
+<?php if (empty($responsables)): ?><tr><td colspan="5" class="text-center text-muted py-4">No hay responsables registrados.</td></tr><?php endif; ?>
+<?php foreach ($responsables as $r): ?><tr><td><strong><?= e($r['apellido_paterno'].' '.$r['apellido_materno'].' '.$r['nombres']) ?></strong></td><td><?= e($r['carnet_identidad'] ?? '-') ?></td><td><?= e($r['celular'] ?? '-') ?></td><td><?= e($r['grado_instruccion'] ?? '-') ?></td><td class="text-end"><a class="btn btn-outline-primary btn-sm" href="<?= e(url('/responsables/editar?id='.$r['id_responsable'])) ?>">Editar</a></td></tr><?php endforeach; ?>
+</tbody></table></div></div>

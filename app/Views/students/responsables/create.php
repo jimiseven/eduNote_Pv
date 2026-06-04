@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Nuevo responsable</h2></div><?php $action = url('/responsables'); $submitLabel = 'Crear responsable'; require BASE_PATH . '/app/Views/students/responsables/_form.php'; ?>

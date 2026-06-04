@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Nueva asignacion docente</h2></div><?php $action = url('/asignaciones-docentes'); $submitLabel = 'Guardar asignacion'; require BASE_PATH . '/app/Views/academic/asignaciones_docentes/_form.php'; ?>

@@ -1,0 +1,62 @@
+GUIA BASICA DE DESPLIEGUE EN CPANEL
+
+1. Crear base de datos
+
+- Crear una base de datos MySQL desde cPanel.
+- Crear un usuario MySQL.
+- Asignar el usuario a la base de datos con permisos completos.
+- Importar el archivo coldbend.sql desde phpMyAdmin.
+
+
+2. Configurar conexion
+
+El sistema permite configurar la conexion mediante variables de entorno.
+
+Variables necesarias:
+
+DB_HOST
+DB_PORT
+DB_DATABASE
+DB_USERNAME
+DB_PASSWORD
+
+Si el servidor no permite variables de entorno, editar directamente:
+
+config/database.php
+
+
+3. Subir archivos
+
+Subir el proyecto al hosting.
+
+Recomendado:
+
+- Apuntar el dominio o subdominio a la carpeta public/ si cPanel lo permite.
+- Si no es posible, mantener index.php de la raiz como entrada principal.
+
+
+4. Revisar .htaccess
+
+El proyecto incluye:
+
+.htaccess
+public/.htaccess
+
+Estos archivos permiten URLs limpias.
+
+
+5. Seguridad inicial
+
+- Cambiar las contrasenas temporales de los usuarios iniciales.
+- Crear un Administrador General propio.
+- Crear los colegios reales.
+- Crear administradores de colegio.
+- Inhabilitar usuarios demo si ya no se usan.
+
+
+6. Usuarios iniciales del SQL
+
+superadmin / admin123
+admin_demo / admin123
+
+El sistema fuerza cambio de contrasena inicial.

@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Editar curso</h2></div><?php $action = url('/cursos/actualizar'); $submitLabel = 'Guardar cambios'; require BASE_PATH . '/app/Views/academic/cursos/_form.php'; ?>

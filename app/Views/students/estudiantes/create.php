@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Nuevo estudiante</h2></div><?php $action = url('/estudiantes'); $submitLabel = 'Crear estudiante'; require BASE_PATH . '/app/Views/students/estudiantes/_form.php'; ?>

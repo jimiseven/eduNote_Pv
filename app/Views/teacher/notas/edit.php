@@ -1,0 +1,11 @@
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h2 class="h3 fw-bold mb-1">Cargar notas</h2><p class="text-muted mb-0"><?= e($evaluacion['nombre_nivel'].' '.$evaluacion['grado'].' '.$evaluacion['paralelo'].' - '.$evaluacion['nombre_materia'].' / '.$evaluacion['periodo']) ?></p></div><a href="<?= e(url('/profesor/evaluaciones')) ?>" class="btn btn-outline-secondary">Volver</a></div>
+<?php if (!empty($success)): ?><div class="alert alert-success"><?= e($success) ?></div><?php endif; ?>
+<?php if (!empty($errors)): ?><div class="alert alert-danger"><ul class="mb-0"><?php foreach($errors as $error): ?><li><?= e($error) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+<form method="post" action="<?= e(url('/profesor/notas?id='.$evaluacion['id_evaluacion'])) ?>" class="panel-card p-0 overflow-hidden">
+    <?= csrf_field() ?>
+    <div class="table-responsive"><table class="table mb-0 align-middle"><thead class="table-light"><tr><th>Estudiante</th><th>RUDE</th><th style="width:160px">Nota</th><th>Comentario</th></tr></thead><tbody>
+    <?php if(empty($estudiantes)): ?><tr><td colspan="4" class="text-center text-muted py-4">No hay estudiantes matriculados activos para este curso y gestion.</td></tr><?php endif; ?>
+    <?php foreach($estudiantes as $est): ?><tr><td><strong><?= e($est['apellido_paterno'].' '.$est['apellido_materno'].' '.$est['nombres']) ?></strong></td><td><code><?= e($est['rude']) ?></code></td><td><input type="number" step="0.01" min="0" max="100" name="notas[<?= e((string)$est['id_matricula']) ?>]" class="form-control" value="<?= e((string)($est['nota'] ?? '')) ?>" <?= $evaluacion['estado']==='cerrada'?'disabled':'' ?>></td><td><input name="comentarios[<?= e((string)$est['id_matricula']) ?>]" class="form-control" value="<?= e($est['comentario'] ?? '') ?>" <?= $evaluacion['estado']==='cerrada'?'disabled':'' ?>></td></tr><?php endforeach; ?>
+    </tbody></table></div>
+    <div class="d-flex justify-content-end p-3 border-top"><?php if($evaluacion['estado']==='abierta'): ?><button class="btn btn-primary">Guardar notas</button><?php else: ?><span class="badge text-bg-secondary">Evaluacion cerrada</span><?php endif; ?></div>
+</form>

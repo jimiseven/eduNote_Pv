@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Asignar materia a curso</h2></div><?php $action = url('/cursos-materias'); $submitLabel = 'Guardar asignacion'; require BASE_PATH . '/app/Views/academic/cursos_materias/_form.php'; ?>

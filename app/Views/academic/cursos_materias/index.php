@@ -1,0 +1,6 @@
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h2 class="h3 fw-bold mb-1">Materias por curso</h2><p class="text-muted mb-0">Define que materias corresponden a cada curso.</p></div><a href="<?= e(url('/cursos-materias/crear')) ?>" class="btn btn-primary">Asignar materia</a></div>
+<?php if (!empty($success)): ?><div class="alert alert-success"><?= e($success) ?></div><?php endif; ?>
+<div class="panel-card p-0 overflow-hidden"><div class="table-responsive"><table class="table mb-0 align-middle"><thead class="table-light"><tr><th>Curso</th><th>Materia</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody>
+<?php if (empty($items)): ?><tr><td colspan="4" class="text-center text-muted py-4">No hay materias asignadas a cursos.</td></tr><?php endif; ?>
+<?php foreach ($items as $item): ?><tr><td><?= e($item['nombre_nivel'] . ' ' . $item['grado'] . ' ' . $item['paralelo']) ?></td><td><strong><?= e($item['nombre_materia']) ?></strong></td><td><?= (int)$item['estado'] === 1 ? '<span class="badge text-bg-success">Activa</span>' : '<span class="badge text-bg-secondary">Inactiva</span>' ?></td><td class="text-end"><a href="<?= e(url('/cursos-materias/editar?id=' . $item['id_curso_materia'])) ?>" class="btn btn-outline-primary btn-sm">Editar</a></td></tr><?php endforeach; ?>
+</tbody></table></div></div>

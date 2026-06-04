@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Nueva matricula</h2></div><?php $action = url('/matriculas'); $submitLabel = 'Registrar matricula'; require BASE_PATH . '/app/Views/students/matriculas/_form.php'; ?>

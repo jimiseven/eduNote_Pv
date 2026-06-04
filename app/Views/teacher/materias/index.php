@@ -1,0 +1,6 @@
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h2 class="h3 fw-bold mb-1">Mis materias</h2><p class="text-muted mb-0">Materias y cursos asignados para cargar evaluaciones y notas.</p></div><a href="<?= e(url('/profesor/evaluaciones/crear')) ?>" class="btn btn-primary">Nueva evaluacion</a></div>
+<?php if (!empty($success)): ?><div class="alert alert-success"><?= e($success) ?></div><?php endif; ?>
+<div class="panel-card p-0 overflow-hidden"><div class="table-responsive"><table class="table mb-0 align-middle"><thead class="table-light"><tr><th>Gestion</th><th>Curso</th><th>Materia</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody>
+<?php if (empty($asignaciones)): ?><tr><td colspan="5" class="text-center text-muted py-4">No tienes materias asignadas.</td></tr><?php endif; ?>
+<?php foreach ($asignaciones as $a): ?><tr><td><?= e($a['gestion']) ?></td><td><?= e($a['nombre_nivel'].' '.$a['grado'].' '.$a['paralelo']) ?></td><td><strong><?= e($a['nombre_materia']) ?></strong></td><td><span class="badge text-bg-success"><?= e($a['estado']) ?></span></td><td class="text-end"><a class="btn btn-outline-primary btn-sm" href="<?= e(url('/profesor/evaluaciones/crear')) ?>">Crear evaluacion</a></td></tr><?php endforeach; ?>
+</tbody></table></div></div>

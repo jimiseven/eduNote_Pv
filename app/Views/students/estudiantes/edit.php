@@ -1,0 +1,1 @@
+<div class="mb-4"><h2 class="h3 fw-bold">Editar estudiante</h2></div><?php $action = url('/estudiantes/actualizar'); $submitLabel = 'Guardar cambios'; require BASE_PATH . '/app/Views/students/estudiantes/_form.php'; ?>

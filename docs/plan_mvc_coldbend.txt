@@ -1,0 +1,367 @@
+PLAN DE DESARROLLO DEL SISTEMA COLDBEND
+
+1. Objetivo general
+
+Crear un sistema web para administracion academica estudiantil usando PHP, JavaScript y Bootstrap, con arquitectura MVC y base de datos MySQL/MariaDB llamada coldbend.
+
+El sistema sera multi-colegio: una sola base de datos podra ser usada por varios colegios. Cada usuario sera redirigido al panel correspondiente segun su rol y colegio registrado.
+
+
+2. Tecnologias principales
+
+- PHP
+- MySQL/MariaDB
+- XAMPP para desarrollo local
+- cPanel para despliegue final
+- Bootstrap para interfaz
+- JavaScript para interacciones del frontend
+- Arquitectura MVC
+
+
+3. Estructura de carpetas propuesta
+
+app/
+  Controllers/
+  Models/
+  Views/
+  Core/
+  Middleware/
+  Helpers/
+
+config/
+  database.php
+  app.php
+
+public/
+  index.php
+  assets/
+    css/
+    js/
+    img/
+
+routes/
+  web.php
+
+storage/
+
+docs/
+  plan_mvc_coldbend.txt
+
+
+4. Flujo MVC
+
+El flujo principal del sistema sera:
+
+public/index.php
+-> Router
+-> Controller
+-> Model
+-> View
+
+Ejemplo:
+
+LoginController
+-> PersonalModel
+-> app/Views/auth/login.php
+
+
+5. Base de datos
+
+La base de datos principal sera:
+
+coldbend
+
+El archivo SQL generado es:
+
+coldbend.sql
+
+La base incluye:
+
+- colegios
+- roles
+- personal
+- gestiones
+- periodos_academicos
+- configuracion_sistema
+- niveles
+- cursos
+- estudiantes
+- responsables
+- estudiantes_responsables
+- matriculas
+- materias
+- cursos_materias
+- asignaciones_docentes
+- evaluaciones
+- notas
+- calificaciones_periodo
+- datos complementarios actuales del estudiante
+- anuncios
+- reportes_guardados
+
+
+6. Roles del sistema
+
+Roles iniciales:
+
+1. Administrador General
+2. Administrador Colegio
+3. Director
+4. Secretario
+5. Profesor
+
+
+7. Administrador General
+
+Funciones principales:
+
+- Crear colegios.
+- Editar colegios.
+- Activar o desactivar colegios.
+- Crear administradores de colegio.
+- Ver informacion general del sistema.
+- Acceder al panel global.
+
+Este rol puede tener id_colegio NULL.
+
+
+8. Administrador Colegio
+
+Funciones principales:
+
+- Administrar solo su colegio.
+- Gestionar usuarios internos.
+- Gestionar docentes.
+- Gestionar niveles, cursos y materias.
+- Gestionar gestiones y periodos academicos.
+- Gestionar asignaciones docentes.
+- Consultar reportes del colegio.
+
+Este rol siempre debe tener id_colegio asignado.
+
+
+9. Director
+
+Funciones principales:
+
+- Consultar informacion academica del colegio.
+- Revisar estudiantes, docentes, cursos y notas.
+- Consultar reportes.
+
+
+10. Secretario
+
+Funciones principales:
+
+- Registrar estudiantes.
+- Registrar responsables.
+- Asociar varios responsables a un estudiante.
+- Registrar datos complementarios del estudiante.
+- Gestionar matriculas.
+
+
+11. Profesor
+
+Funciones principales:
+
+- Iniciar sesion con usuario y contrasena.
+- Ver solo sus materias asignadas.
+- Crear evaluaciones.
+- Cargar notas de estudiantes.
+- Editar notas mientras el periodo/evaluacion este habilitado.
+
+
+12. Login
+
+El login se realizara con:
+
+- usuario
+- contrasena
+
+No se usara email ni carnet para iniciar sesion.
+
+Flujo:
+
+1. El usuario ingresa usuario y contrasena.
+2. El sistema busca el usuario activo en la tabla personal.
+3. PHP valida la contrasena con password_verify.
+4. El sistema identifica el rol.
+5. El sistema identifica el id_colegio si corresponde.
+6. El sistema redirige al dashboard correspondiente.
+
+Redirecciones:
+
+- Administrador General -> panel general
+- Administrador Colegio -> panel del colegio
+- Director -> panel academico
+- Secretario -> panel administrativo de estudiantes
+- Profesor -> panel de carga de notas
+
+
+13. Seguridad multi-colegio
+
+Todas las consultas de datos academicos deben filtrar por id_colegio.
+
+Ejemplo:
+
+SELECT * FROM estudiantes WHERE id_colegio = :id_colegio;
+
+Excepcion:
+
+El Administrador General podra consultar informacion global cuando sea necesario.
+
+Regla importante:
+
+Ningun colegio debe poder ver datos de otro colegio.
+
+
+14. Modulos iniciales del sistema
+
+Modulo 1: Autenticacion
+
+- Login
+- Logout
+- Sesiones
+- Validacion de rol
+- Redireccion por rol
+
+Modulo 2: Dashboard
+
+- Dashboard para Administrador General
+- Dashboard para Administrador Colegio
+- Dashboard para Director
+- Dashboard para Secretario
+- Dashboard para Profesor
+
+Modulo 3: Colegios
+
+- Listar colegios
+- Crear colegio
+- Editar colegio
+- Activar/desactivar colegio
+- Crear administrador del colegio
+
+Modulo 4: Personal
+
+- Listar personal del colegio
+- Crear usuario
+- Editar usuario
+- Asignar rol
+- Habilitar/inhabilitar usuario
+
+Modulo 5: Estudiantes
+
+- Registrar estudiante
+- Editar estudiante
+- Consultar estudiante
+- Gestionar estado del estudiante
+- Registrar datos complementarios existentes
+
+Modulo 6: Responsables
+
+- Registrar responsable
+- Editar responsable
+- Asociar varios responsables a un estudiante
+- Definir parentesco
+- Definir responsable principal
+- Definir si esta autorizado para recoger al estudiante
+
+Modulo 7: Matriculas
+
+- Matricular estudiante por gestion
+- Asignar curso
+- Controlar estado de matricula
+- Mantener historial academico del estudiante
+
+Modulo 8: Cursos y niveles
+
+- Gestionar niveles
+- Gestionar cursos
+- Manejar grado, paralelo y turno Manana
+
+Modulo 9: Materias
+
+- Crear materias
+- Editar materias
+- Asignar materias a cursos
+
+Modulo 10: Asignaciones docentes
+
+- Asignar docente a curso-materia por gestion
+- Permitir que un docente dicte varias materias
+- Permitir que una materia sea dictada por varios docentes en diferentes cursos o paralelos
+
+Modulo 11: Evaluaciones y notas
+
+- Crear evaluaciones
+- Registrar notas de 0 a 100
+- Validar rango de nota
+- Calcular calificacion por periodo
+- Mostrar estudiantes inscritos en el curso correspondiente
+
+Modulo 12: Reportes
+
+- Estudiantes por colegio
+- Estudiantes por curso
+- Docentes por materia
+- Notas por curso y materia
+- Responsables por estudiante
+
+
+15. Primer MVP recomendado
+
+Fase 1:
+
+- Crear configuracion base MVC.
+- Crear conexion PDO a coldbend.
+- Crear router basico.
+- Crear login y logout.
+- Crear sesiones.
+- Crear middleware de autenticacion.
+- Crear dashboard por rol.
+
+Fase 2:
+
+- CRUD de colegios para Administrador General.
+- CRUD de personal para Administrador Colegio.
+
+Fase 3:
+
+- CRUD de estudiantes.
+- CRUD de responsables.
+- Asociacion estudiante-responsable.
+- Matriculas.
+
+Fase 4:
+
+- Niveles, cursos y materias.
+- Asignaciones docentes.
+
+Fase 5:
+
+- Evaluaciones.
+- Carga de notas por profesor.
+- Calificaciones por periodo.
+
+Fase 6:
+
+- Reportes basicos.
+- Mejoras de interfaz.
+- Validaciones adicionales.
+
+
+16. Recomendacion de inicio
+
+Iniciar implementando:
+
+1. public/index.php
+2. config/database.php
+3. app/Core/Database.php
+4. app/Core/Router.php
+5. app/Controllers/AuthController.php
+6. app/Models/Personal.php
+7. app/Views/auth/login.php
+8. app/Views/layouts/main.php
+9. app/Views/dashboard/*.php
+
+Esto permitira tener la primera version funcional con login, sesiones y redireccion por rol.

@@ -5,13 +5,8 @@
             <p>Desde este panel se gestionaran los colegios, administradores y configuracion global del sistema.</p>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="panel-card"><h3>Colegios</h3><p>Crear, editar, activar e inhabilitar colegios.</p></div>
-    </div>
-    <div class="col-md-4">
-        <div class="panel-card"><h3>Administradores</h3><p>Asignar administradores a cada colegio registrado.</p></div>
-    </div>
-    <div class="col-md-4">
-        <div class="panel-card"><h3>Supervision</h3><p>Consultar el estado general de la plataforma.</p></div>
-    </div>
+    <div class="col-md-3"><a class="metric-card" href="<?= e(url('/colegios')) ?>"><span>Colegios activos</span><strong><?= e((string) ($metrics['colegios_activos'] ?? 0)) ?></strong></a></div>
+    <div class="col-md-3"><a class="metric-card" href="<?= e(url('/colegios')) ?>"><span>Colegios inactivos</span><strong><?= e((string) ($metrics['colegios_inactivos'] ?? 0)) ?></strong></a></div>
+    <div class="col-md-3"><a class="metric-card" href="<?= e(url('/personal')) ?>"><span>Usuarios activos</span><strong><?= e((string) ($metrics['usuarios_activos'] ?? 0)) ?></strong></a></div>
+    <div class="col-md-3"><a class="metric-card" href="<?= e(url('/personal')) ?>"><span>Admins colegio</span><strong><?= e((string) ($metrics['administradores_colegio'] ?? 0)) ?></strong></a></div>
 </div>

@@ -51,4 +51,26 @@ class Nota extends Model
             ]);
         }
     }
+
+    public function byEstudiante(int $idEstudiante, int $idColegio): array
+    {
+        $statement = $this->db->prepare(
+            'SELECT nt.*, ev.nombre AS evaluacion, ev.tipo, ev.fecha, pa.nombre AS periodo,
+                    m.nombre_materia, g.nombre AS gestion, c.grado, c.paralelo, n.nombre_nivel
+             FROM notas nt
+             INNER JOIN matriculas mt ON mt.id_matricula = nt.id_matricula
+             INNER JOIN evaluaciones ev ON ev.id_evaluacion = nt.id_evaluacion
+             INNER JOIN periodos_academicos pa ON pa.id_periodo = ev.id_periodo
+             INNER JOIN asignaciones_docentes ad ON ad.id_asignacion = ev.id_asignacion
+             INNER JOIN cursos_materias cm ON cm.id_curso_materia = ad.id_curso_materia
+             INNER JOIN materias m ON m.id_materia = cm.id_materia
+             INNER JOIN gestiones g ON g.id_gestion = mt.id_gestion
+             INNER JOIN cursos c ON c.id_curso = mt.id_curso
+             INNER JOIN niveles n ON n.id_nivel = c.id_nivel
+             WHERE mt.id_estudiante = :id_estudiante AND nt.id_colegio = :id_colegio
+             ORDER BY g.anio DESC, pa.numero_periodo ASC, m.nombre_materia ASC, ev.fecha DESC, ev.id_evaluacion DESC'
+        );
+        $statement->execute(['id_estudiante' => $idEstudiante, 'id_colegio' => $idColegio]);
+        return $statement->fetchAll();
+    }
 }

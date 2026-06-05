@@ -101,6 +101,9 @@ $router->post('/asignaciones-docentes/actualizar', [AsignacionesDocentesControll
 $router->get('/estudiantes', [EstudiantesController::class, 'index']);
 $router->get('/estudiantes/crear', [EstudiantesController::class, 'create']);
 $router->post('/estudiantes', [EstudiantesController::class, 'store']);
+$router->get('/estudiantes/ver', [EstudiantesController::class, 'show']);
+$router->get('/estudiantes/complementarios', [EstudiantesController::class, 'complementarios']);
+$router->post('/estudiantes/complementarios', [EstudiantesController::class, 'updateComplementarios']);
 $router->get('/estudiantes/editar', [EstudiantesController::class, 'edit']);
 $router->post('/estudiantes/actualizar', [EstudiantesController::class, 'update']);
 $router->get('/estudiantes/responsables', [EstudiantesController::class, 'responsables']);

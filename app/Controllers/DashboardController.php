@@ -4,35 +4,51 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Models\Dashboard;
 
 class DashboardController extends Controller
 {
+    private Dashboard $dashboard;
+
+    public function __construct()
+    {
+        $this->dashboard = new Dashboard();
+    }
+
     public function adminGeneral(): void
     {
-        $this->renderForRole('Administrador General', 'dashboard/admin_general', 'Panel General');
+        $this->renderForRole('Administrador General', 'dashboard/admin_general', 'Panel General', $this->dashboard->adminGeneral());
     }
 
     public function adminColegio(): void
     {
-        $this->renderForRole('Administrador Colegio', 'dashboard/admin_colegio', 'Panel del Colegio');
+        Auth::requireLogin();
+        $user = Auth::user();
+        $this->renderForRole('Administrador Colegio', 'dashboard/admin_colegio', 'Panel del Colegio', $this->dashboard->adminColegio((int) $user['id_colegio']));
     }
 
     public function director(): void
     {
-        $this->renderForRole('Director', 'dashboard/director', 'Panel Director');
+        Auth::requireLogin();
+        $user = Auth::user();
+        $this->renderForRole('Director', 'dashboard/director', 'Panel Director', $this->dashboard->director((int) $user['id_colegio']));
     }
 
     public function secretario(): void
     {
-        $this->renderForRole('Secretario', 'dashboard/secretario', 'Panel Secretario');
+        Auth::requireLogin();
+        $user = Auth::user();
+        $this->renderForRole('Secretario', 'dashboard/secretario', 'Panel Secretario', $this->dashboard->secretario((int) $user['id_colegio']));
     }
 
     public function profesor(): void
     {
-        $this->renderForRole('Profesor', 'dashboard/profesor', 'Panel Profesor');
+        Auth::requireLogin();
+        $user = Auth::user();
+        $this->renderForRole('Profesor', 'dashboard/profesor', 'Panel Profesor', $this->dashboard->profesor((int) $user['id_colegio'], (int) $user['id_personal']));
     }
 
-    private function renderForRole(string $role, string $view, string $title): void
+    private function renderForRole(string $role, string $view, string $title, array $metrics = []): void
     {
         Auth::requireLogin();
 
@@ -49,6 +65,7 @@ class DashboardController extends Controller
         $this->view($view, [
             'title' => $title,
             'user' => $user,
+            'metrics' => $metrics,
         ]);
     }
 

@@ -13,6 +13,40 @@ class Responsable extends Model
         return $statement->fetchAll();
     }
 
+    public function paginate(int $idColegio, array $filters, int $page = 1, int $perPage = 10): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, min(100, $perPage));
+        [$where, $params] = $this->filterSql($idColegio, $filters);
+
+        $count = $this->db->prepare('SELECT COUNT(*) FROM responsables ' . $where);
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $statement = $this->db->prepare(
+            'SELECT * FROM responsables ' . $where . '
+             ORDER BY apellido_paterno ASC, apellido_materno ASC, nombres ASC
+             LIMIT :limit OFFSET :offset'
+        );
+        foreach ($params as $key => $value) {
+            $statement->bindValue(':' . $key, $value);
+        }
+        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return [
+            'data' => $statement->fetchAll(),
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total_pages' => $totalPages,
+        ];
+    }
+
     public function find(int $idResponsable, int $idColegio): ?array
     {
         $statement = $this->db->prepare('SELECT * FROM responsables WHERE id_responsable = :id_responsable AND id_colegio = :id_colegio LIMIT 1');
@@ -62,5 +96,19 @@ class Responsable extends Model
     {
         $value = trim((string) $value);
         return $value === '' ? null : $value;
+    }
+
+    private function filterSql(int $idColegio, array $filters): array
+    {
+        $conditions = ['id_colegio = :id_colegio'];
+        $params = ['id_colegio' => $idColegio];
+
+        $search = trim($filters['q'] ?? '');
+        if ($search !== '') {
+            $conditions[] = '(nombres LIKE :search OR apellido_paterno LIKE :search OR apellido_materno LIKE :search OR carnet_identidad LIKE :search OR celular LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        return ['WHERE ' . implode(' AND ', $conditions), $params];
     }
 }

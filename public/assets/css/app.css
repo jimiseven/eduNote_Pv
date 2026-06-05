@@ -222,6 +222,45 @@ body {
     color: var(--cb-muted);
 }
 
+.metric-card {
+    height: 100%;
+    min-height: 132px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22px;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    background: #fff;
+    color: var(--cb-dark);
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    border-color: #bfdbfe;
+    color: var(--cb-dark);
+    box-shadow: 0 16px 34px rgba(37, 84, 214, 0.12);
+}
+
+.metric-card span {
+    color: var(--cb-muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.metric-card strong {
+    font-size: 38px;
+    line-height: 1;
+    color: var(--cb-primary);
+}
+
+.metric-card.warning strong {
+    color: #d97706;
+}
+
 .hero-card {
     background: linear-gradient(135deg, #ffffff, #eef4ff);
 }

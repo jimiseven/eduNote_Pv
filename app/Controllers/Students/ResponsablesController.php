@@ -14,7 +14,17 @@ class ResponsablesController extends Controller
     public function index(): void
     {
         $user = $this->requireRole(['Administrador Colegio', 'Secretario']);
-        $this->view('students/responsables/index', ['title' => 'Responsables', 'responsables' => $this->responsables->all((int) $user['id_colegio']), 'success' => flash('success')]);
+        $filters = ['q' => trim($_GET['q'] ?? '')];
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $pagination = $this->responsables->paginate((int) $user['id_colegio'], $filters, $page, 10);
+
+        $this->view('students/responsables/index', [
+            'title' => 'Responsables',
+            'responsables' => $pagination['data'],
+            'filters' => $filters,
+            'pagination' => $pagination,
+            'success' => flash('success'),
+        ]);
     }
 
     public function create(): void

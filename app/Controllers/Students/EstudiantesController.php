@@ -4,28 +4,46 @@ namespace App\Controllers\Students;
 
 use App\Core\Controller;
 use App\Models\Estudiante;
+use App\Models\EstudianteComplementario;
 use App\Models\EstudianteResponsable;
+use App\Models\Matricula;
+use App\Models\Nota;
 use App\Models\Responsable;
 
 class EstudiantesController extends Controller
 {
     private Estudiante $estudiantes;
+    private EstudianteComplementario $complementarios;
     private Responsable $responsables;
     private EstudianteResponsable $relaciones;
+    private Matricula $matriculas;
+    private Nota $notas;
 
     public function __construct()
     {
         $this->estudiantes = new Estudiante();
+        $this->complementarios = new EstudianteComplementario();
         $this->responsables = new Responsable();
         $this->relaciones = new EstudianteResponsable();
+        $this->matriculas = new Matricula();
+        $this->notas = new Nota();
     }
 
     public function index(): void
     {
         $user = $this->requireRole(['Administrador Colegio', 'Secretario']);
+        $filters = [
+            'q' => trim($_GET['q'] ?? ''),
+            'estado' => trim($_GET['estado'] ?? ''),
+        ];
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $pagination = $this->estudiantes->paginate((int) $user['id_colegio'], $filters, $page, 10);
+
         $this->view('students/estudiantes/index', [
             'title' => 'Estudiantes',
-            'estudiantes' => $this->estudiantes->all((int) $user['id_colegio']),
+            'estudiantes' => $pagination['data'],
+            'filters' => $filters,
+            'pagination' => $pagination,
             'success' => flash('success'),
         ]);
     }
@@ -34,6 +52,70 @@ class EstudiantesController extends Controller
     {
         $this->requireRole(['Administrador Colegio', 'Secretario']);
         $this->form('students/estudiantes/create');
+    }
+
+    public function show(): void
+    {
+        $user = $this->requireRole(['Administrador Colegio', 'Secretario']);
+        $idEstudiante = $this->id();
+        $idColegio = (int) $user['id_colegio'];
+        $estudiante = $this->estudiantes->find($idEstudiante, $idColegio);
+
+        if ($estudiante === null) {
+            $this->notFound();
+            return;
+        }
+
+        $notas = $this->notas->byEstudiante($idEstudiante, $idColegio);
+        $promedio = $notas === [] ? null : array_sum(array_map(static fn (array $nota): float => (float) $nota['nota'], $notas)) / count($notas);
+
+        $this->view('students/estudiantes/show', [
+            'title' => 'Ficha del Estudiante',
+            'estudiante' => $estudiante,
+            'responsables' => $this->relaciones->byEstudiante($idEstudiante, $idColegio),
+            'matriculas' => $this->matriculas->byEstudiante($idEstudiante, $idColegio),
+            'notas' => $notas,
+            'promedio' => $promedio,
+            'complementarios' => $this->complementarios->all($idEstudiante),
+        ]);
+    }
+
+    public function complementarios(): void
+    {
+        $user = $this->requireRole(['Administrador Colegio', 'Secretario']);
+        $idEstudiante = $this->id();
+        $idColegio = (int) $user['id_colegio'];
+        $estudiante = $this->estudiantes->find($idEstudiante, $idColegio);
+
+        if ($estudiante === null) {
+            $this->notFound();
+            return;
+        }
+
+        $this->view('students/estudiantes/complementarios', [
+            'title' => 'Datos Complementarios',
+            'estudiante' => $estudiante,
+            'data' => $_SESSION['old'] ?? $this->complementarios->all($idEstudiante),
+            'success' => flash('success'),
+        ]);
+        unset($_SESSION['old']);
+    }
+
+    public function updateComplementarios(): void
+    {
+        $user = $this->requireRole(['Administrador Colegio', 'Secretario']);
+        $this->verifyCsrf();
+        $idEstudiante = $this->id();
+        $idColegio = (int) $user['id_colegio'];
+
+        if ($this->estudiantes->find($idEstudiante, $idColegio) === null) {
+            $this->notFound();
+            return;
+        }
+
+        $this->complementarios->save($idEstudiante, $_POST);
+        flash('success', 'Datos complementarios actualizados correctamente.');
+        $this->redirect('/estudiantes/complementarios?id=' . $idEstudiante);
     }
 
     public function store(): void

@@ -24,10 +24,20 @@ class PersonalController extends Controller
     {
         $user = $this->requireManager();
         $idColegio = $this->isAdminGeneral($user) ? null : (int) $user['id_colegio'];
+        $filters = [
+            'q' => trim($_GET['q'] ?? ''),
+            'id_rol' => (int) ($_GET['id_rol'] ?? 0),
+            'estado' => trim((string) ($_GET['estado'] ?? '')),
+        ];
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $pagination = $this->personal->paginate($idColegio, $filters, $page, 10);
 
         $this->view('personal/index', [
             'title' => $this->isAdminGeneral($user) ? 'Administradores y Personal' : 'Personal del Colegio',
-            'personal' => $this->personal->all($idColegio),
+            'personal' => $pagination['data'],
+            'roles' => $this->roles->allowedFor($user['nombre_rol']),
+            'filters' => $filters,
+            'pagination' => $pagination,
             'success' => $this->pullFlash('success'),
             'authUser' => $user,
         ]);

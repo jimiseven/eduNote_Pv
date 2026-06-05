@@ -27,6 +27,48 @@ class Personal extends Model
         return $statement->fetchAll();
     }
 
+    public function paginate(?int $idColegio, array $filters, int $page = 1, int $perPage = 10): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, min(100, $perPage));
+        [$where, $params] = $this->filterSql($idColegio, $filters);
+
+        $count = $this->db->prepare(
+            'SELECT COUNT(*)
+             FROM personal p
+             INNER JOIN roles r ON r.id_rol = p.id_rol
+             LEFT JOIN colegios c ON c.id_colegio = p.id_colegio ' . $where
+        );
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $statement = $this->db->prepare(
+            'SELECT p.*, r.nombre_rol, c.nombre AS colegio
+             FROM personal p
+             INNER JOIN roles r ON r.id_rol = p.id_rol
+             LEFT JOIN colegios c ON c.id_colegio = p.id_colegio ' . $where . '
+             ORDER BY p.estado DESC, p.apellidos ASC, p.nombres ASC
+             LIMIT :limit OFFSET :offset'
+        );
+        foreach ($params as $key => $value) {
+            $statement->bindValue(':' . $key, $value);
+        }
+        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return [
+            'data' => $statement->fetchAll(),
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total_pages' => $totalPages,
+        ];
+    }
+
     public function teachers(int $idColegio): array
     {
         $statement = $this->db->prepare(
@@ -191,5 +233,36 @@ class Personal extends Model
     {
         $value = trim((string) $value);
         return $value === '' ? null : $value;
+    }
+
+    private function filterSql(?int $idColegio, array $filters): array
+    {
+        $conditions = [];
+        $params = [];
+
+        if ($idColegio !== null) {
+            $conditions[] = 'p.id_colegio = :id_colegio';
+            $params['id_colegio'] = $idColegio;
+        }
+
+        $search = trim($filters['q'] ?? '');
+        if ($search !== '') {
+            $conditions[] = '(p.nombres LIKE :search OR p.apellidos LIKE :search OR p.usuario LIKE :search OR p.carnet_identidad LIKE :search OR p.celular LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $idRol = (int) ($filters['id_rol'] ?? 0);
+        if ($idRol > 0) {
+            $conditions[] = 'p.id_rol = :id_rol';
+            $params['id_rol'] = $idRol;
+        }
+
+        $estado = trim((string) ($filters['estado'] ?? ''));
+        if ($estado === '1' || $estado === '0') {
+            $conditions[] = 'p.estado = :estado';
+            $params['estado'] = (int) $estado;
+        }
+
+        return [$conditions === [] ? '' : 'WHERE ' . implode(' AND ', $conditions), $params];
     }
 }

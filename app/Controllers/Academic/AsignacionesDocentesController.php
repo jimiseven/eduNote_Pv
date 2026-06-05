@@ -20,7 +20,22 @@ class AsignacionesDocentesController extends Controller
     public function index(): void
     {
         $user = $this->requireRole('Administrador Colegio');
-        $this->view('academic/asignaciones_docentes/index', ['title' => 'Asignaciones Docentes', 'asignaciones' => $this->asignaciones->all((int) $user['id_colegio']), 'success' => flash('success')]);
+        $filters = [
+            'q' => trim($_GET['q'] ?? ''),
+            'id_gestion' => (int) ($_GET['id_gestion'] ?? 0),
+            'estado' => trim($_GET['estado'] ?? ''),
+        ];
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $pagination = $this->asignaciones->paginate((int) $user['id_colegio'], $filters, $page, 10);
+
+        $this->view('academic/asignaciones_docentes/index', [
+            'title' => 'Asignaciones Docentes',
+            'asignaciones' => $pagination['data'],
+            'gestiones' => $this->gestiones->all((int) $user['id_colegio']),
+            'filters' => $filters,
+            'pagination' => $pagination,
+            'success' => flash('success'),
+        ]);
     }
 
     public function create(): void { $this->showForm('academic/asignaciones_docentes/create'); }

@@ -1,0 +1,390 @@
+-- Datos demo EduNote: Colegio 6 de Agosto
+-- Base de datos esperada: coldbend
+-- Ejecutar despues de importar coldbend.sql.
+-- Contrasena temporal para todos los usuarios creados: admin123
+
+USE `coldbend`;
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 1;
+
+START TRANSACTION;
+
+-- --------------------------------------------------------
+-- Roles base
+-- --------------------------------------------------------
+
+INSERT INTO roles (nombre_rol, descripcion) VALUES
+('Administrador General', 'Administra todos los colegios y la configuracion global del sistema'),
+('Administrador Colegio', 'Administra un colegio especifico'),
+('Director', 'Consulta y gestiona informacion academica del colegio'),
+('Secretario', 'Registra estudiantes, responsables y matriculas'),
+('Profesor', 'Carga evaluaciones y notas de sus asignaciones')
+ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion);
+
+SET @rol_admin_general := (SELECT id_rol FROM roles WHERE nombre_rol = 'Administrador General' LIMIT 1);
+SET @rol_admin_colegio := (SELECT id_rol FROM roles WHERE nombre_rol = 'Administrador Colegio' LIMIT 1);
+SET @rol_director := (SELECT id_rol FROM roles WHERE nombre_rol = 'Director' LIMIT 1);
+SET @rol_secretario := (SELECT id_rol FROM roles WHERE nombre_rol = 'Secretario' LIMIT 1);
+SET @rol_profesor := (SELECT id_rol FROM roles WHERE nombre_rol = 'Profesor' LIMIT 1);
+SET @pass_admin123 := '$2y$10$vY8JE8jiRcMpe4ZOQT/FTue.tqal3.7.6CXcchCZisCN7uPGdOaG.';
+
+-- --------------------------------------------------------
+-- Colegio, gestion y periodos
+-- --------------------------------------------------------
+
+INSERT INTO colegios (nombre, codigo, nit, telefono, correo, direccion, ciudad, departamento, pais, estado) VALUES
+('Colegio 6 de Agosto', 'COL_6_AGOSTO', '10060001', '22446688', 'contacto@colegio6agosto.bo', 'Av. 6 de Agosto #100', 'La Paz', 'La Paz', 'Bolivia', 1)
+ON DUPLICATE KEY UPDATE
+    nombre = VALUES(nombre),
+    nit = VALUES(nit),
+    telefono = VALUES(telefono),
+    correo = VALUES(correo),
+    direccion = VALUES(direccion),
+    ciudad = VALUES(ciudad),
+    departamento = VALUES(departamento),
+    pais = VALUES(pais),
+    estado = VALUES(estado);
+
+SET @id_colegio := (SELECT id_colegio FROM colegios WHERE codigo = 'COL_6_AGOSTO' LIMIT 1);
+
+INSERT INTO gestiones (id_colegio, anio, nombre, fecha_inicio, fecha_fin, estado) VALUES
+(@id_colegio, 2026, 'Gestion 2026', '2026-02-03', '2026-11-30', 'activa')
+ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), fecha_inicio = VALUES(fecha_inicio), fecha_fin = VALUES(fecha_fin), estado = VALUES(estado);
+
+SET @id_gestion := (SELECT id_gestion FROM gestiones WHERE id_colegio = @id_colegio AND anio = 2026 LIMIT 1);
+
+INSERT INTO periodos_academicos (id_colegio, id_gestion, numero_periodo, nombre, fecha_inicio, fecha_fin, estado) VALUES
+(@id_colegio, @id_gestion, 1, 'Primer Periodo', '2026-02-03', '2026-04-30', 'activo'),
+(@id_colegio, @id_gestion, 2, 'Segundo Periodo', '2026-05-01', '2026-08-31', 'pendiente'),
+(@id_colegio, @id_gestion, 3, 'Tercer Periodo', '2026-09-01', '2026-11-30', 'pendiente')
+ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), fecha_inicio = VALUES(fecha_inicio), fecha_fin = VALUES(fecha_fin), estado = VALUES(estado);
+
+SET @id_periodo_1 := (SELECT id_periodo FROM periodos_academicos WHERE id_gestion = @id_gestion AND numero_periodo = 1 LIMIT 1);
+
+INSERT INTO configuracion_sistema (id_colegio, id_gestion_actual, cantidad_periodos, escala_nota_minima, escala_nota_maxima, nota_aprobacion) VALUES
+(@id_colegio, @id_gestion, 3, 0.00, 100.00, 51.00)
+ON DUPLICATE KEY UPDATE id_gestion_actual = VALUES(id_gestion_actual), cantidad_periodos = VALUES(cantidad_periodos), escala_nota_minima = VALUES(escala_nota_minima), escala_nota_maxima = VALUES(escala_nota_maxima), nota_aprobacion = VALUES(nota_aprobacion);
+
+-- --------------------------------------------------------
+-- Usuarios del sistema
+-- --------------------------------------------------------
+
+INSERT INTO personal (id_colegio, id_rol, nombres, apellidos, celular, carnet_identidad, usuario, password, estado, debe_cambiar_password) VALUES
+(NULL, @rol_admin_general, 'Super', 'Administrador 6 de Agosto', '70000001', 'AG-0001', 'superadmin_6agosto', @pass_admin123, 1, 1),
+(@id_colegio, @rol_admin_colegio, 'Administrador', 'Colegio 6 de Agosto', '70000002', 'AG-0002', 'admin_6agosto', @pass_admin123, 1, 1),
+(@id_colegio, @rol_director, 'Director', 'Academico 6 de Agosto', '70000003', 'AG-0003', 'director_6agosto', @pass_admin123, 1, 1),
+(@id_colegio, @rol_secretario, 'Secretaria', 'Registro 6 de Agosto', '70000004', 'AG-0004', 'secretario_6agosto', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Matematica', '70000005', 'AG-0005', 'prof_matematica', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Comunicacion y Lenguajes', '70000006', 'AG-0006', 'prof_lenguaje', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Ciencias Naturales', '70000007', 'AG-0007', 'prof_ciencias', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Ciencias Sociales', '70000008', 'AG-0008', 'prof_sociales', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Educacion Fisica', '70000009', 'AG-0009', 'prof_educacion_fisica', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Artes y Musica', '70000010', 'AG-0010', 'prof_artes', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Tecnica Tecnologica', '70000011', 'AG-0011', 'prof_tecnica', @pass_admin123, 1, 1),
+(@id_colegio, @rol_profesor, 'Docente', 'Valores y Religiones', '70000012', 'AG-0012', 'prof_valores', @pass_admin123, 1, 1)
+ON DUPLICATE KEY UPDATE
+    id_colegio = VALUES(id_colegio),
+    id_rol = VALUES(id_rol),
+    nombres = VALUES(nombres),
+    apellidos = VALUES(apellidos),
+    celular = VALUES(celular),
+    estado = VALUES(estado);
+
+-- --------------------------------------------------------
+-- Niveles y cursos
+-- Inicial: 1A, 1B, 2A, 2B
+-- Primaria: 1A hasta 6B
+-- Secundaria: 1A hasta 6B
+-- --------------------------------------------------------
+
+INSERT INTO niveles (id_colegio, nombre_nivel, orden) VALUES
+(@id_colegio, 'Inicial', 1),
+(@id_colegio, 'Primaria', 2),
+(@id_colegio, 'Secundaria', 3)
+ON DUPLICATE KEY UPDATE orden = VALUES(orden);
+
+SET @nivel_inicial := (SELECT id_nivel FROM niveles WHERE id_colegio = @id_colegio AND nombre_nivel = 'Inicial' LIMIT 1);
+SET @nivel_primaria := (SELECT id_nivel FROM niveles WHERE id_colegio = @id_colegio AND nombre_nivel = 'Primaria' LIMIT 1);
+SET @nivel_secundaria := (SELECT id_nivel FROM niveles WHERE id_colegio = @id_colegio AND nombre_nivel = 'Secundaria' LIMIT 1);
+
+DROP PROCEDURE IF EXISTS sp_demo_cursos_6agosto;
+DELIMITER $$
+CREATE PROCEDURE sp_demo_cursos_6agosto()
+BEGIN
+    DECLARE grado_actual INT DEFAULT 1;
+    DECLARE paralelo_actual VARCHAR(1);
+
+    SET grado_actual = 1;
+    WHILE grado_actual <= 2 DO
+        SET paralelo_actual = 'A';
+        INSERT INTO cursos (id_colegio, id_nivel, grado, paralelo, turno, estado) VALUES (@id_colegio, @nivel_inicial, grado_actual, paralelo_actual, 'Manana', 1)
+        ON DUPLICATE KEY UPDATE turno = VALUES(turno), estado = VALUES(estado);
+        SET paralelo_actual = 'B';
+        INSERT INTO cursos (id_colegio, id_nivel, grado, paralelo, turno, estado) VALUES (@id_colegio, @nivel_inicial, grado_actual, paralelo_actual, 'Manana', 1)
+        ON DUPLICATE KEY UPDATE turno = VALUES(turno), estado = VALUES(estado);
+        SET grado_actual = grado_actual + 1;
+    END WHILE;
+
+    SET grado_actual = 1;
+    WHILE grado_actual <= 6 DO
+        SET paralelo_actual = 'A';
+        INSERT INTO cursos (id_colegio, id_nivel, grado, paralelo, turno, estado) VALUES (@id_colegio, @nivel_primaria, grado_actual, paralelo_actual, 'Manana', 1)
+        ON DUPLICATE KEY UPDATE turno = VALUES(turno), estado = VALUES(estado);
+        SET paralelo_actual = 'B';
+        INSERT INTO cursos (id_colegio, id_nivel, grado, paralelo, turno, estado) VALUES (@id_colegio, @nivel_primaria, grado_actual, paralelo_actual, 'Manana', 1)
+        ON DUPLICATE KEY UPDATE turno = VALUES(turno), estado = VALUES(estado);
+        SET grado_actual = grado_actual + 1;
+    END WHILE;
+
+    SET grado_actual = 1;
+    WHILE grado_actual <= 6 DO
+        SET paralelo_actual = 'A';
+        INSERT INTO cursos (id_colegio, id_nivel, grado, paralelo, turno, estado) VALUES (@id_colegio, @nivel_secundaria, grado_actual, paralelo_actual, 'Manana', 1)
+        ON DUPLICATE KEY UPDATE turno = VALUES(turno), estado = VALUES(estado);
+        SET paralelo_actual = 'B';
+        INSERT INTO cursos (id_colegio, id_nivel, grado, paralelo, turno, estado) VALUES (@id_colegio, @nivel_secundaria, grado_actual, paralelo_actual, 'Manana', 1)
+        ON DUPLICATE KEY UPDATE turno = VALUES(turno), estado = VALUES(estado);
+        SET grado_actual = grado_actual + 1;
+    END WHILE;
+END$$
+DELIMITER ;
+CALL sp_demo_cursos_6agosto();
+DROP PROCEDURE IF EXISTS sp_demo_cursos_6agosto;
+
+-- --------------------------------------------------------
+-- Materias basadas en areas comunes del curriculo escolar boliviano
+-- --------------------------------------------------------
+
+INSERT INTO materias (id_colegio, nombre_materia, es_submateria, materia_padre_id, es_extra, estado) VALUES
+(@id_colegio, 'Comunicacion y Lenguajes', 0, NULL, 0, 1),
+(@id_colegio, 'Matematica', 0, NULL, 0, 1),
+(@id_colegio, 'Ciencias Naturales', 0, NULL, 0, 1),
+(@id_colegio, 'Ciencias Sociales', 0, NULL, 0, 1),
+(@id_colegio, 'Educacion Fisica y Deportes', 0, NULL, 0, 1),
+(@id_colegio, 'Artes Plasticas y Visuales', 0, NULL, 0, 1),
+(@id_colegio, 'Educacion Musical', 0, NULL, 0, 1),
+(@id_colegio, 'Tecnica Tecnologica General', 0, NULL, 0, 1),
+(@id_colegio, 'Valores Espiritualidad y Religiones', 0, NULL, 0, 1),
+(@id_colegio, 'Lengua Extranjera', 0, NULL, 0, 1),
+(@id_colegio, 'Biologia', 0, NULL, 0, 1),
+(@id_colegio, 'Fisica', 0, NULL, 0, 1),
+(@id_colegio, 'Quimica', 0, NULL, 0, 1),
+(@id_colegio, 'Geografia', 0, NULL, 0, 1),
+(@id_colegio, 'Historia', 0, NULL, 0, 1),
+(@id_colegio, 'Filosofia', 0, NULL, 0, 1),
+(@id_colegio, 'Psicologia', 0, NULL, 0, 1),
+(@id_colegio, 'Cosmovisiones', 0, NULL, 0, 1)
+ON DUPLICATE KEY UPDATE estado = VALUES(estado), es_extra = VALUES(es_extra);
+
+-- Inicial: campos formativos basicos.
+INSERT IGNORE INTO cursos_materias (id_colegio, id_curso, id_materia, estado)
+SELECT @id_colegio, c.id_curso, m.id_materia, 1
+FROM cursos c
+INNER JOIN niveles n ON n.id_nivel = c.id_nivel
+INNER JOIN materias m ON m.id_colegio = @id_colegio
+WHERE c.id_colegio = @id_colegio
+  AND n.nombre_nivel = 'Inicial'
+  AND m.nombre_materia IN ('Comunicacion y Lenguajes', 'Matematica', 'Ciencias Naturales', 'Educacion Fisica y Deportes', 'Artes Plasticas y Visuales', 'Educacion Musical', 'Valores Espiritualidad y Religiones');
+
+-- Primaria: areas basicas y formativas.
+INSERT IGNORE INTO cursos_materias (id_colegio, id_curso, id_materia, estado)
+SELECT @id_colegio, c.id_curso, m.id_materia, 1
+FROM cursos c
+INNER JOIN niveles n ON n.id_nivel = c.id_nivel
+INNER JOIN materias m ON m.id_colegio = @id_colegio
+WHERE c.id_colegio = @id_colegio
+  AND n.nombre_nivel = 'Primaria'
+  AND m.nombre_materia IN ('Comunicacion y Lenguajes', 'Matematica', 'Ciencias Naturales', 'Ciencias Sociales', 'Educacion Fisica y Deportes', 'Artes Plasticas y Visuales', 'Educacion Musical', 'Tecnica Tecnologica General', 'Valores Espiritualidad y Religiones', 'Lengua Extranjera');
+
+-- Secundaria: areas generales y especializadas.
+INSERT IGNORE INTO cursos_materias (id_colegio, id_curso, id_materia, estado)
+SELECT @id_colegio, c.id_curso, m.id_materia, 1
+FROM cursos c
+INNER JOIN niveles n ON n.id_nivel = c.id_nivel
+INNER JOIN materias m ON m.id_colegio = @id_colegio
+WHERE c.id_colegio = @id_colegio
+  AND n.nombre_nivel = 'Secundaria'
+  AND m.nombre_materia IN ('Comunicacion y Lenguajes', 'Matematica', 'Biologia', 'Fisica', 'Quimica', 'Geografia', 'Historia', 'Filosofia', 'Psicologia', 'Cosmovisiones', 'Educacion Fisica y Deportes', 'Artes Plasticas y Visuales', 'Educacion Musical', 'Tecnica Tecnologica General', 'Valores Espiritualidad y Religiones', 'Lengua Extranjera');
+
+-- --------------------------------------------------------
+-- Asignaciones docentes, evaluaciones y notas
+-- --------------------------------------------------------
+
+INSERT IGNORE INTO asignaciones_docentes (id_colegio, id_gestion, id_personal, id_curso_materia, estado)
+SELECT
+    @id_colegio,
+    @id_gestion,
+    CASE
+        WHEN m.nombre_materia = 'Matematica' THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_matematica' LIMIT 1)
+        WHEN m.nombre_materia = 'Comunicacion y Lenguajes' OR m.nombre_materia = 'Lengua Extranjera' THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_lenguaje' LIMIT 1)
+        WHEN m.nombre_materia IN ('Ciencias Naturales', 'Biologia', 'Fisica', 'Quimica') THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_ciencias' LIMIT 1)
+        WHEN m.nombre_materia IN ('Ciencias Sociales', 'Geografia', 'Historia', 'Filosofia', 'Psicologia', 'Cosmovisiones') THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_sociales' LIMIT 1)
+        WHEN m.nombre_materia = 'Educacion Fisica y Deportes' THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_educacion_fisica' LIMIT 1)
+        WHEN m.nombre_materia IN ('Artes Plasticas y Visuales', 'Educacion Musical') THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_artes' LIMIT 1)
+        WHEN m.nombre_materia = 'Tecnica Tecnologica General' THEN (SELECT id_personal FROM personal WHERE usuario = 'prof_tecnica' LIMIT 1)
+        ELSE (SELECT id_personal FROM personal WHERE usuario = 'prof_valores' LIMIT 1)
+    END AS id_personal,
+    cm.id_curso_materia,
+    'activo'
+FROM cursos_materias cm
+INNER JOIN materias m ON m.id_materia = cm.id_materia
+WHERE cm.id_colegio = @id_colegio;
+
+INSERT INTO evaluaciones (id_colegio, id_asignacion, id_periodo, nombre, tipo, ponderacion, fecha, estado)
+SELECT @id_colegio, ad.id_asignacion, @id_periodo_1, CONCAT('Diagnostico - ', m.nombre_materia), 'examen', 100.00, '2026-03-15', 'abierta'
+FROM asignaciones_docentes ad
+INNER JOIN cursos_materias cm ON cm.id_curso_materia = ad.id_curso_materia
+INNER JOIN materias m ON m.id_materia = cm.id_materia
+WHERE ad.id_colegio = @id_colegio
+  AND ad.id_gestion = @id_gestion
+  AND NOT EXISTS (
+      SELECT 1 FROM evaluaciones ev
+      WHERE ev.id_asignacion = ad.id_asignacion
+        AND ev.id_periodo = @id_periodo_1
+        AND ev.nombre = CONCAT('Diagnostico - ', m.nombre_materia)
+  );
+
+-- --------------------------------------------------------
+-- Estudiantes, responsables, datos complementarios y matriculas
+-- 28 cursos x 20 estudiantes = 560 estudiantes
+-- --------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_demo_estudiantes_6agosto;
+DELIMITER $$
+CREATE PROCEDURE sp_demo_estudiantes_6agosto()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_id_curso INT;
+    DECLARE v_id_nivel INT;
+    DECLARE v_nivel VARCHAR(80);
+    DECLARE v_grado INT;
+    DECLARE v_paralelo VARCHAR(5);
+    DECLARE i INT;
+    DECLARE v_rude VARCHAR(30);
+    DECLARE v_ci VARCHAR(30);
+    DECLARE v_nombre VARCHAR(80);
+    DECLARE v_apellido_paterno VARCHAR(80);
+    DECLARE v_apellido_materno VARCHAR(80);
+    DECLARE v_genero VARCHAR(20);
+    DECLARE v_fecha DATE;
+    DECLARE v_id_estudiante INT;
+    DECLARE v_id_responsable INT;
+    DECLARE v_base_edad INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT c.id_curso, c.id_nivel, n.nombre_nivel, c.grado, c.paralelo
+        FROM cursos c
+        INNER JOIN niveles n ON n.id_nivel = c.id_nivel
+        WHERE c.id_colegio = @id_colegio
+        ORDER BY n.orden, c.grado, c.paralelo;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+    curso_loop: LOOP
+        FETCH cur INTO v_id_curso, v_id_nivel, v_nivel, v_grado, v_paralelo;
+        IF done = 1 THEN
+            LEAVE curso_loop;
+        END IF;
+
+        SET i = 1;
+        WHILE i <= 20 DO
+            SET v_rude = CONCAT('6A-', v_id_curso, '-', LPAD(i, 2, '0'));
+            SET v_ci = CONCAT('60', LPAD(v_id_curso, 3, '0'), LPAD(i, 2, '0'));
+            SET v_genero = IF(MOD(i, 2) = 0, 'Femenino', 'Masculino');
+            SET v_nombre = ELT(MOD(i, 10) + 1, 'Andres', 'Maria', 'Luis', 'Ana', 'Carlos', 'Lucia', 'Diego', 'Sofia', 'Javier', 'Camila');
+            SET v_apellido_paterno = ELT(MOD(i + v_id_curso, 10) + 1, 'Mamani', 'Quispe', 'Condori', 'Choque', 'Flores', 'Vargas', 'Rojas', 'Gutierrez', 'Lopez', 'Fernandez');
+            SET v_apellido_materno = ELT(MOD(i + v_id_curso + 3, 10) + 1, 'Apaza', 'Aliaga', 'Paredes', 'Calle', 'Soria', 'Miranda', 'Camacho', 'Aguilar', 'Torrez', 'Salazar');
+
+            SET v_base_edad = CASE
+                WHEN v_nivel = 'Inicial' THEN 4 + v_grado
+                WHEN v_nivel = 'Primaria' THEN 5 + v_grado
+                ELSE 11 + v_grado
+            END;
+            SET v_fecha = DATE_SUB('2026-02-01', INTERVAL v_base_edad YEAR) + INTERVAL MOD(i, 28) DAY;
+
+            INSERT INTO estudiantes (id_colegio, nombres, apellido_paterno, apellido_materno, genero, rude, carnet_identidad, fecha_nacimiento, pais, provincia_departamento, estado)
+            VALUES (@id_colegio, v_nombre, v_apellido_paterno, v_apellido_materno, v_genero, v_rude, v_ci, v_fecha, 'Bolivia', 'La Paz', 'activo')
+            ON DUPLICATE KEY UPDATE nombres = VALUES(nombres), apellido_paterno = VALUES(apellido_paterno), apellido_materno = VALUES(apellido_materno), genero = VALUES(genero), carnet_identidad = VALUES(carnet_identidad), fecha_nacimiento = VALUES(fecha_nacimiento), estado = VALUES(estado);
+
+            SET v_id_estudiante = (SELECT id_estudiante FROM estudiantes WHERE id_colegio = @id_colegio AND rude = v_rude LIMIT 1);
+
+            INSERT INTO responsables (id_colegio, nombres, apellido_paterno, apellido_materno, carnet_identidad, fecha_nacimiento, grado_instruccion, idioma_frecuente, celular)
+            VALUES (@id_colegio, CONCAT('Responsable ', v_nombre), v_apellido_paterno, v_apellido_materno, CONCAT('R-', v_ci), DATE_SUB(v_fecha, INTERVAL 25 YEAR), 'Secundaria', 'Castellano', CONCAT('7', LPAD(v_id_curso, 3, '0'), LPAD(i, 4, '0')))
+            ON DUPLICATE KEY UPDATE nombres = VALUES(nombres), apellido_paterno = VALUES(apellido_paterno), apellido_materno = VALUES(apellido_materno), celular = VALUES(celular);
+
+            SET v_id_responsable = (SELECT id_responsable FROM responsables WHERE id_colegio = @id_colegio AND carnet_identidad = CONCAT('R-', v_ci) LIMIT 1);
+
+            INSERT IGNORE INTO estudiantes_responsables (id_colegio, id_estudiante, id_responsable, parentesco, es_principal, vive_con_estudiante, autorizado_recoger)
+            VALUES (@id_colegio, v_id_estudiante, v_id_responsable, IF(MOD(i, 2) = 0, 'Madre', 'Padre'), 1, 1, 1);
+
+            INSERT INTO matriculas (id_colegio, id_estudiante, id_curso, id_gestion, fecha_matricula, estado, observacion)
+            VALUES (@id_colegio, v_id_estudiante, v_id_curso, @id_gestion, '2026-02-03', 'activo', 'Matricula demo generada para Colegio 6 de Agosto')
+            ON DUPLICATE KEY UPDATE id_curso = VALUES(id_curso), estado = VALUES(estado), observacion = VALUES(observacion);
+
+            INSERT INTO estudiante_direccion (id_estudiante, departamento, provincia, municipio, localidad, comunidad, zona, numero_vivienda, telefono, celular)
+            VALUES (v_id_estudiante, 'La Paz', 'Murillo', 'La Paz', 'La Paz', NULL, ELT(MOD(i, 4) + 1, 'Sopocachi', 'Miraflores', 'San Pedro', 'Villa Copacabana'), CONCAT('N-', LPAD(i, 3, '0')), NULL, CONCAT('7', LPAD(v_id_curso, 3, '0'), LPAD(i, 4, '0')))
+            ON DUPLICATE KEY UPDATE zona = VALUES(zona), numero_vivienda = VALUES(numero_vivienda), celular = VALUES(celular);
+
+            INSERT INTO estudiante_salud (id_estudiante, tiene_seguro, acceso_posta, acceso_centro_salud, acceso_hospital)
+            VALUES (v_id_estudiante, IF(MOD(i, 3) = 0, 1, 0), 1, 1, IF(MOD(i, 4) = 0, 1, 0))
+            ON DUPLICATE KEY UPDATE tiene_seguro = VALUES(tiene_seguro), acceso_posta = VALUES(acceso_posta), acceso_centro_salud = VALUES(acceso_centro_salud), acceso_hospital = VALUES(acceso_hospital);
+
+            INSERT INTO estudiante_servicios (id_estudiante, agua_caneria, bano, alcantarillado, internet, energia, recojo_basura, tipo_vivienda)
+            VALUES (v_id_estudiante, 1, 1, 1, IF(MOD(i, 5) = 0, 0, 1), 1, 1, ELT(MOD(i, 4) + 1, 'propia', 'alquilada', 'cedida', 'anticretico'))
+            ON DUPLICATE KEY UPDATE internet = VALUES(internet), tipo_vivienda = VALUES(tipo_vivienda);
+
+            INSERT INTO estudiante_transporte (id_estudiante, medio, tiempo_llegada)
+            VALUES (v_id_estudiante, ELT(MOD(i, 3) + 1, 'a_pie', 'vehiculo', 'otro'), IF(MOD(i, 4) = 0, 'mas_media_hora', 'menos_media_hora'))
+            ON DUPLICATE KEY UPDATE medio = VALUES(medio), tiempo_llegada = VALUES(tiempo_llegada);
+
+            INSERT INTO estudiante_dificultades (id_estudiante, tiene_dificultad, auditiva, visual, intelectual, fisico_motora, psiquica_mental, autista)
+            VALUES (v_id_estudiante, 0, 'ninguna', 'ninguna', 'ninguna', 'ninguna', 'ninguna', 'ninguna')
+            ON DUPLICATE KEY UPDATE tiene_dificultad = VALUES(tiene_dificultad);
+
+            INSERT INTO estudiante_idioma_cultura (id_estudiante, idioma, cultura)
+            VALUES (v_id_estudiante, IF(MOD(i, 3) = 0, 'Aymara', 'Castellano'), IF(MOD(i, 3) = 0, 'Aymara', 'Mestiza'))
+            ON DUPLICATE KEY UPDATE idioma = VALUES(idioma), cultura = VALUES(cultura);
+
+            SET i = i + 1;
+        END WHILE;
+    END LOOP;
+    CLOSE cur;
+END$$
+DELIMITER ;
+CALL sp_demo_estudiantes_6agosto();
+DROP PROCEDURE IF EXISTS sp_demo_estudiantes_6agosto;
+
+-- Notas demo: una nota por estudiante en cada evaluacion de su curso.
+INSERT IGNORE INTO notas (id_colegio, id_evaluacion, id_matricula, nota, comentario)
+SELECT
+    @id_colegio,
+    ev.id_evaluacion,
+    mt.id_matricula,
+    ROUND(55 + MOD(mt.id_matricula + ev.id_evaluacion, 41), 2) AS nota,
+    'Nota demo generada automaticamente'
+FROM evaluaciones ev
+INNER JOIN asignaciones_docentes ad ON ad.id_asignacion = ev.id_asignacion
+INNER JOIN cursos_materias cm ON cm.id_curso_materia = ad.id_curso_materia
+INNER JOIN matriculas mt ON mt.id_curso = cm.id_curso AND mt.id_gestion = ad.id_gestion
+WHERE ev.id_colegio = @id_colegio
+  AND mt.id_colegio = @id_colegio
+  AND ad.id_gestion = @id_gestion;
+
+COMMIT;
+
+-- --------------------------------------------------------
+-- Usuarios creados / actualizados
+-- --------------------------------------------------------
+-- Contrasena para todos: admin123
+-- superadmin_6agosto
+-- admin_6agosto
+-- director_6agosto
+-- secretario_6agosto
+-- prof_matematica
+-- prof_lenguaje
+-- prof_ciencias
+-- prof_sociales
+-- prof_educacion_fisica
+-- prof_artes
+-- prof_tecnica
+-- prof_valores

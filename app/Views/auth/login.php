@@ -1,8 +1,8 @@
 <main class="auth-page">
     <section class="auth-card shadow-lg">
         <div class="auth-intro">
-            <span class="brand-mark large">CB</span>
-            <h1>ColdBend</h1>
+            <span class="brand-mark large">EN</span>
+            <h1>EduNote</h1>
             <p>Administracion academica multi-colegio para estudiantes, docentes, materias y notas.</p>
         </div>
 

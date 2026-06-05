@@ -118,9 +118,9 @@ $roleGroups = $groups[$role] ?? [];
 
 <aside class="app-sidebar">
     <div class="sidebar-brand">
-        <span class="brand-mark">CB</span>
+        <span class="brand-mark">EN</span>
         <div>
-            <strong>ColdBend</strong>
+            <strong>EduNote</strong>
             <small>Sistema academico</small>
         </div>
     </div>
@@ -149,4 +149,21 @@ $roleGroups = $groups[$role] ?? [];
             </section>
         <?php endforeach; ?>
     </nav>
+
+    <div class="sidebar-user">
+        <div class="sidebar-user-meta">
+            <span class="sidebar-user-avatar"><?= e(strtoupper(substr($authUser['nombres'] ?? 'U', 0, 1))) ?></span>
+            <div>
+                <strong><?= e(trim(($authUser['nombres'] ?? '') . ' ' . ($authUser['apellidos'] ?? '')) ?: 'Usuario') ?></strong>
+                <small><?= e($authUser['nombre_rol'] ?? '') ?></small>
+                <?php if (!empty($authUser['colegio'])): ?>
+                    <small><?= e($authUser['colegio']) ?></small>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="sidebar-user-actions">
+            <a href="<?= e(url('/cuenta/cambiar-contrasena')) ?>">Cambiar contrasena</a>
+            <a href="<?= e(url('/logout')) ?>" class="danger">Salir</a>
+        </div>
+    </div>
 </aside>
